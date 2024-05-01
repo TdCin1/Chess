@@ -1,6 +1,10 @@
-#include <iostream>
+#include "ChessWindow/Window.h"
+#include "Pieces/Pieces.h"
+using namespace std;
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    Window window;
+    window.setupSprites();
+    window();
     return 0;
 }
