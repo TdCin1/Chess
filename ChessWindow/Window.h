@@ -26,6 +26,7 @@ public:
     void loadTextures();
     void setupSprites();
     void loadSprite(piece &pe, string texture, float scale);
+    void place(piece& pe, char a, int y);
     sf::Texture& getTexture(const string& filename, const string& key);
 };
 
