@@ -3,6 +3,7 @@
 #include <iostream>
 #include<map>
 #include <SFML/Graphics.hpp>
+#include <bitset>
 
 using namespace std;
 
@@ -11,6 +12,7 @@ public:
     struct piece {
         string name;
         sf::Sprite* sprite;
+        bitset<64> bitmap;
 
         int col;
         int row;

@@ -48,3 +48,4 @@ void BitBoard::And(BitBoard* set) {
 void BitBoard::setBoardNum(unsigned long long num) {
     board = num;
 }
+

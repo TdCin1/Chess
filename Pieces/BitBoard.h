@@ -16,12 +16,12 @@ public:
         assert(0<=y && y<=7);
         return board[8*y+x];
     }
-    auto searchByLetters(char a, int y){
-        int x = (unsigned int)a-97;
+    auto searchByLetters(char letter, int num){
+        int x = (unsigned int)letter-97;
         assert(0<=x && x<=7);
-        assert(1<=y && y<=8);
-        y--;
-        return board[8*x+y];
+        assert(1<=num && num<=8);
+        num--;
+        return board[8*x+num];
     }
     void setAll(bool val){
         if(val)
