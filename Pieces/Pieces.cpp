@@ -142,6 +142,10 @@ void Pieces::reset() {
 }
 
 void Pieces::update() {
+    whiteBoard->setAll(false);
+    blackBoard->setAll(false);
+    totalBoard->setAll(false);
+
     whiteBoard->Or(whitePawn);
     whiteBoard->Or(whiteKnights);
     whiteBoard->Or(whiteRooks);
@@ -163,7 +167,98 @@ void Pieces::update() {
 
 //BEHAVIORS
 void Pieces::moveWhite(char from_x, int from_y, char to_x, char to_y) {
+    //0->Pawn 1->rook 2->bishop 3->knight 4->king 5->queen
+    //6->blackPawn 7->blackRook 8->blackBishop 9->blackKnight 10->blackKing 11->blackQueen
+    int num = whichPiece(from_x,from_y);
+    cout<<"num: "<<num<<endl;
 
+    bitset<64> temp = getPossibleMoves(from_x,from_y);
+    temp = getBitStringExample(to_x,to_y) & temp;
+    if (temp.count() == 0) {
+        cout << endl << "NO SUCH SQUARE" << endl;
+        throw 42;
+    }
+
+    else{
+        //THE MOVE IS VALID
+        //White Pawn
+        //NEED TO ADD CORRECT CAPTURES
+        if(num==0){
+            whitePawn->searchByLetters(from_x,from_y)=false;
+            removeIfThere(from_x,from_y,0);
+            whitePawn->searchByLetters(to_x,to_y)=true;
+        }
+        else if(num==1){
+            whiteRooks->searchByLetters(from_x,from_y)=false;
+            removeIfThere(from_x,from_y,1);
+            whiteRooks->searchByLetters(to_x,to_y)=true;
+        }
+        else if(num ==2){
+
+        }
+    }
+
+    update();
+}
+
+void Pieces::moveBlack(char from_x, int from_y, char to_x, char to_y) {
+
+}
+
+void Pieces::removeIfThere(char a, int y, int choice) {
+    //0->Pawn 1->rook 2->bishop 3->knight 4->king 5->queen
+    //6->blackPawn 7->blackRook 8->blackBishop 9->blackKnight 10->blackKing 11->blackQueen
+    if(choice==-1){
+        return;
+    }
+    else if(choice==0){
+        whitePawn->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==1){
+        whiteRooks->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==2){
+        whiteBishops->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==3){
+        whiteKnights->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==4){
+        whiteKing->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==5){
+        whiteQueen->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==6){
+        blackPawn->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==7){
+        blackRooks->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==8){
+        blackBishops->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==9){
+        blackKnights->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==10){
+        blackKing->searchByLetters(a,y)=false;
+        return;
+    }
+    else if(choice==11){
+        blackQueen->searchByLetters(a,y)=false;
+        return;
+    }
 
 }
 
@@ -174,36 +269,68 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
         throw 42;
     }
     //0->Pawn 1->rook 2->bishop 3->knight 4->king 5->queen
+    //6->blackPawn 7->blackRook 8->blackBishop 9->blackKnight 10->blackKing 11->blackQueen
     //char to unsigned int a = 97
 
     int num = whichPiece(from_x, from_y);
+    bool isWhite=false;
+    if(6>num){
+        isWhite=true;
+    }
     BitBoard result;
 
     //PAWN
+    //NEED TO ADD CAPTURES
     if (num==0) {
-        result.searchByLetters(from_x,from_y+1) = true;
-        if(from_y == 2){
-            result.searchByLetters(from_x,from_y+2)=true;
+        if(isFree(from_x,from_y+1)){
+            result.searchByLetters(from_x,from_y+1) = true;
+        }
+        if(isFree(from_x,from_y+1)){
+            if(from_y == 2){
+                result.searchByLetters(from_x,from_y+2)=true;
+            }
         }
         return result.getBoard();
     }
     //ROOK
-    else if(num==1){
+    else if(num==1||num==7){
         //ROWS AHEAD
         for(int i = from_y+1;i < 9;i++){
             if(isFree(from_x,i)){
                 result.searchByLetters(from_x,i) = true;
             }
             else{
+                int pieceAhead = whichPiece(from_x,i);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters(from_x,i) = true;
+                }
+
                 break;
             }
         }
         //ROWS BEHIND
-        for(int i = from_y-1;i >-1;i--){
+        for(int i = from_y-1;i >0;i--){
             if(isFree(from_x,i)){
                 result.searchByLetters(from_x,i) = true;
             }
             else{
+                int pieceAhead = whichPiece(from_x,i);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters(from_x,i) = true;
+                }
+
                 break;
             }
         }
@@ -215,6 +342,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y) = true;
+                }
+
                 break;
             }
         }
@@ -224,13 +362,24 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y) = true;
+                }
+
                 break;
             }
         }
         return result.getBoard();
     }
     //BISHOP
-    else if(num==2){
+    else if(num==2||num==8){
         //BOTTOM LEFT
         int loops=0;
         unsigned int cols = (unsigned int)from_x;
@@ -240,6 +389,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y-loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y-loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y-loops) = true;
+                }
+
                 break;
             }
         }
@@ -251,6 +411,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y-loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y-loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y-loops) = true;
+                }
+
                 break;
             }
         }
@@ -262,6 +433,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y+loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y+loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y+loops) = true;
+                }
+
                 break;
             }
         }
@@ -273,6 +455,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y+loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y+loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y+loops) = true;
+                }
+
                 break;
             }
         }
@@ -281,7 +474,7 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
         return result.getBoard();
     }
     //KNIGHT
-    else if(num==3){
+    else if(num==3||num==9){
         unsigned int cols = (unsigned int)from_x;
         char x;
         int y;
@@ -289,137 +482,227 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
         //TOP LEFT height
         x=cols-1;
         y=from_y+2;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
 
         //TOP LEFT wide
         x=cols-2;
         y=from_y+1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
 
         //BOTTOM LEFT height
         x=cols-1;
         y=from_y-2;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
 
         //BOTTOM LEFT wide
         x=cols-2;
         y=from_y-1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
 
         //TOP RIGHT height
         x=cols+1;
         y=from_y+2;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         //TOP RIGHT wide
         x=cols+2;
         y=from_y+1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         //BOTTOM RIGHT height
         x=cols+1;
         y=from_y-2;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         //BOTTOM RIGHT wide
         x=cols+2;
         y=from_y-1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
             }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
+            }
         }
-
         //RETURN
         return result.getBoard();
     }
     //KING
     //NEED TO ADD CASTLING
-    else if(num==4){
+    else if(num==4||num==10){
         unsigned int cols = (unsigned int)from_x;
         char x;
         int y;
 
+
         //Circle around king
         x=cols-1;
         y=from_y;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
             }
         }
         x=cols-1;
         y=from_y+1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         x=cols;
         y=from_y+1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         x=cols+1;
         y=from_y+1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         x=cols+1;
         y=from_y;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         x=cols+1;
         y=from_y-1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         x=cols;
         y=from_y-1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
         x=cols-1;
         y=from_y-1;
-        if((104>=cols && cols>=97)&&(8>=y && y>=1)){
+        if((104>=x && x>=97)&&(8>=y && y>=1)){
             if(isFree(x,y)){
                 result.searchByLetters((unsigned char)x,y) = true;
+            }
+            else{
+                int pieceAhead = whichPiece(x,y);
+                if(!((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite))){
+                    result.searchByLetters((unsigned char)x,y) = true;
+                }
             }
         }
 
@@ -427,23 +710,45 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
         return result.getBoard();
     }
     //QUEEN
-    else if(num==5){
-        //Rook movements
+    else if(num==5||num==11) {
+        //ROOK
         //ROWS AHEAD
         for(int i = from_y+1;i < 9;i++){
             if(isFree(from_x,i)){
                 result.searchByLetters(from_x,i) = true;
             }
             else{
+                int pieceAhead = whichPiece(from_x,i);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters(from_x,i) = true;
+                }
+
                 break;
             }
         }
         //ROWS BEHIND
-        for(int i = from_y-1;i >-1;i--){
+        for(int i = from_y-1;i >0;i--){
             if(isFree(from_x,i)){
                 result.searchByLetters(from_x,i) = true;
             }
             else{
+                int pieceAhead = whichPiece(from_x,i);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters(from_x,i) = true;
+                }
+
                 break;
             }
         }
@@ -455,6 +760,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y) = true;
+                }
+
                 break;
             }
         }
@@ -464,12 +780,22 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y) = true;
+                }
+
                 break;
             }
         }
-        //Bishop movements
+        //BISHOP
         //BOTTOM LEFT
-
         int loops=0;
         cols = (unsigned int)from_x;
         for(unsigned int i = cols+1;i<105;i++){
@@ -478,6 +804,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y-loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y-loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y-loops) = true;
+                }
+
                 break;
             }
         }
@@ -489,6 +826,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y-loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y-loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y-loops) = true;
+                }
+
                 break;
             }
         }
@@ -500,6 +848,17 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y+loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y+loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y+loops) = true;
+                }
+
                 break;
             }
         }
@@ -511,28 +870,36 @@ bitset<64> Pieces::getPossibleMoves(char from_x, int from_y) {
                 result.searchByLetters((unsigned char)i,from_y+loops) = true;
             }
             else{
+                int pieceAhead = whichPiece((unsigned char)i,from_y+loops);
+                if(pieceAhead==-1){
+                    break;
+                }
+                else if((6>pieceAhead && isWhite)||(5<pieceAhead && !isWhite)){
+                    break;
+                }
+                else{
+                    result.searchByLetters((unsigned char)i,from_y+loops) = true;
+                }
+
                 break;
             }
         }
 
         //RETURN
-        result.printBoardNumbered();
         return result.getBoard();
-
     }
     //BLACK PAWN
     else if(num==6){
-        result.searchByLetters(from_x,from_y-1) = true;
-        if(from_y == 7){
-            result.searchByLetters(from_x,from_y-2)=true;
+        if(isFree(from_x,from_y-1)){
+            result.searchByLetters(from_x,from_y-1) = true;
         }
-        result.printBoardNumbered();
+        if(isFree(from_x,from_y-1)){
+            if(from_y == 7){
+                result.searchByLetters(from_x,from_y-2)=true;
+            }
+        }
         return result.getBoard();
     }
-
-}
-
-void Pieces::moveBlack(char from_x, int from_y, char to_x, char to_y) {
 
 }
 
@@ -560,11 +927,8 @@ int Pieces::whichPiece(char a, int y) {
     }
     for(int i=0;i<blackVect.size();i++) {
         if(blackVect.at(i)->searchByLetters(a,y)==1) {
-            if(i==0){
-                return 6;
-            }
             //0->Pawn 1->rook 2->bishop 3->knight 4->king 5->queen
-            return i;
+            return i+6;
         }
     }
     return -1;
